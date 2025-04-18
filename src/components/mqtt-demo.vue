@@ -8,23 +8,24 @@
         <span :class="connectionStatusClass">{{ connectionStatus }}</span>
       </div>
 
-      <el-form style="margin-top: 10px" :model="mqttForm" label-width="auto">
-        <el-form-item label="主题">
-          <el-input
-            disabled
-            style="width: 200px"
-            v-model="mqttForm.subscribeTopic"
-          />
-        </el-form-item>
-      </el-form>
-
-      <div style="margin-top: 10px">
+      <div style="margin-top: 20px">
         <el-button @click="connect" :disabled="isConnected">连接</el-button>
 
         <el-button @click="disConnect" type="danger" :disabled="!isConnected"
           >断开连接</el-button
         >
       </div>
+
+      <el-form style="margin-top: 20px" :model="mqttForm" label-width="auto">
+        <el-form-item label="主题">
+          <el-input
+            disabled
+            style="width: 200px"
+            v-model="mqttForm.subscribeTopic"
+          />
+          <el-button style="margin-left: 20px" type="primary">订阅</el-button>
+        </el-form-item>
+      </el-form>
     </div>
 
     <div class="messages">
@@ -81,7 +82,14 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount, inject, reactive } from "vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  inject,
+  reactive,
+  onUpdated,
+} from "vue";
 import { MQTT_CONFIG } from "../utils/service";
 
 export default {
@@ -93,6 +101,9 @@ export default {
     });
 
     const mqttService = inject("mqttService");
+    onUpdated(() => {
+      console.log(mqttService.subscribeList);
+    });
 
     const isConnected = ref(false);
     const receivedMessages = ref([]);
@@ -144,10 +155,15 @@ export default {
 
       // 尝试连接
       if (!mqttService.client || !mqttService.client.connected) {
-        mqttService.connect(mqttForm.subscribeTopic).catch((err) => {
-          //   handleConnect()
-          console.log(err);
-        });
+        mqttService
+          .connect()
+          .then(() => {
+            mqttService.subscribe(mqttForm.subscribeTopic);
+          })
+          .catch((err) => {
+            //   handleConnect()
+            console.log(err);
+          });
       } else {
         handleConnect();
       }

@@ -26,26 +26,43 @@
        -->
 <template>
   <li class="todo-item">
-    <input type="checkbox" name="cBox" v-model="props.isDone" @click="done" />
-    <span @click="() => currentClick(props.id)" :class="{ 'deleteSpan': props.isDone }">{{ props.title }}</span>
+    <input type="checkbox" name="cBox" v-model="props.todo.isDone" @click="done" />
+    <span
+      @click="() => currentClick(props.todo.id)"
+      :class="{ deleteSpan: props.todo.isDone }"
+      >{{ props.todo.title }}</span
+    >
+    <span style="margin-left: auto; color: black">{{ props.todo.date }}</span>
     <div class="btns">
-      <button @click="centerDialogVisible = true" style="margin-right: 10px" class="button-default">编辑</button>
+      <button
+        @click="centerDialogVisible = true"
+        style="margin-right: 10px"
+        class="button-default"
+      >
+        编辑
+      </button>
       <button class="button-default" @click="remove">删除</button>
     </div>
-    <el-dialog @close="centerDialogVisible = false" v-model="centerDialogVisible" title="代办编辑" width="500" center>
+    <el-dialog
+      @close="centerDialogVisible = false"
+      v-model="centerDialogVisible"
+      title="代办编辑"
+      width="500"
+      center
+    >
       <el-form :model="form">
         <el-form-item label="标题">
           <el-input v-model="form.title" disabled>{{ form.title }}</el-input>
         </el-form-item>
         <el-form-item label="内容">
-          <el-input type="textarea" v-model="form.content">{{ form.content }}</el-input>
+          <el-input type="textarea" v-model="form.content">{{
+            form.content
+          }}</el-input>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="saveTodoItem">
-            保存
-          </el-button>
+          <el-button type="primary" @click="saveTodoItem"> 保存 </el-button>
         </div>
       </template>
     </el-dialog>
@@ -53,42 +70,43 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from "vue";
 
 const props = defineProps({
+  todo: {
     title: String,
     content: String,
     isDone: Boolean,
     id: Number,
+    date: String,
+  },
 });
 
 const form = reactive({
-  title: props.title,
-  content: props.content
+  title: props.todo.title,
+  content: props.todo.content,
 });
 
 const centerDialogVisible = ref(false);
 
-
 const emit = defineEmits();
 
-
 const saveTodoItem = () => {
-  emit('edit', form.content)
+  emit("edit", form.content);
   centerDialogVisible.value = false;
-}
+};
 
 const done = () => {
-  emit('done')
-}
+  emit("done");
+};
 
 const remove = () => {
-  emit('remove')
-}
+  emit("remove");
+};
 
 const currentClick = (id) => {
-  emit('currentClick', id)
-}
+  emit("currentClick", id);
+};
 </script>
 
 <style scoped lang="less">
@@ -97,7 +115,9 @@ const currentClick = (id) => {
   align-items: center;
 
   .btns {
-    margin-left: auto;
+    display: flex;
+    align-items: center;
+    margin-left: 40px;
   }
 
   .button-default {

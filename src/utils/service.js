@@ -19,10 +19,11 @@ class MQTTService {
     this.messageHandlers = new Set();
     this.connectHandler = null;
     this.errorHandler = null;
+    this.subscribeList = new Set();
   }
 
   // 连接MQTT服务器
-  connect(subscribeTopic) {
+  connect() {
     if (this.client && this.client.connected) {
       return Promise.resolve();
     }
@@ -32,7 +33,7 @@ class MQTTService {
 
       this.client.on("connect", () => {
         console.log("MQTT Connected");
-        this.subscribe(subscribeTopic || MQTT_CONFIG.subscribeTopic);
+        // this.subscribe(subscribeTopic || MQTT_CONFIG.subscribeTopic);
         if (this.connectHandler) {
           this.connectHandler();
         }
@@ -81,6 +82,7 @@ class MQTTService {
           console.log(`Subscribed to ${topic}`);
         }
       });
+      this.subscribeList.add(topic);
     }
   }
 
@@ -94,6 +96,7 @@ class MQTTService {
           console.log(`Unsubscribed from ${topic}`);
         }
       });
+      this.subscribeList.delete(topic);
     }
   }
 

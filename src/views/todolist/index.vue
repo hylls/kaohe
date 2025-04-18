@@ -2,7 +2,7 @@
   <div class="todo-page">
     <div class="todo-list">
       <h2>TODO-LIST</h2>
-      <TodoFilter :filter="filter" @update-filter="updateFilter" />
+      <todo-filter :filter="filter" @update-filter="updateFilter" />
       <div class="input-container">
         <input
           class="new-item-input"
@@ -17,10 +17,7 @@
         <todo-item
           v-for="(todo, index) in filteredTodos"
           :key="todo.id"
-          :content="todo.content"
-          :title="todo.title"
-          :isDone="todo.isDone"
-          :id="todo.id"
+          :todo="todo"
           @currentClick="currentTodoClick"
           @remove="() => removeTodo(index)"
           @done="() => doneTodo(index)"
@@ -37,7 +34,7 @@
       </button>
 
       <el-dialog
-        @close="addForm.title = ''"
+        @close="addDialogClose"
         v-model="addVisible"
         title="新增待办事项"
         width="500"
@@ -67,17 +64,7 @@
         <span>已完成: {{ completedTodos }} 项</span>
       </div>
     </div>
-    <div class="right-item" v-if="currentTodo && currentTodo.id">
-      <div style="text-align: right">
-        <el-button circle @click="clearRightItem">
-          <el-icon :size="20">
-            <Close />
-          </el-icon>
-        </el-button>
-      </div>
-      <h2>{{ currentTodo.title }}</h2>
-      <div>{{ currentTodo.content }}</div>
-    </div>
+    <right-page :currentTodo="currentTodo" :clearRightItem="clearRightItem" />
   </div>
 </template>
 
@@ -85,7 +72,9 @@
 import { ref, computed, reactive } from "vue";
 import TodoItem from "./todo-item.vue";
 import TodoFilter from "./todo-filter.vue";
+import RightPage from './right-page.vue';
 import { downloadJSON } from "../../utils/download.js";
+import moment from 'moment';
 
 const newTodoText = ref("");
 
@@ -125,6 +114,7 @@ function saveData() {
 
 const editContent = (index, content) => {
   todos.value[index].content = content;
+  todos.value[index].date = moment().format('YYY-MM-DD HH:mm:ss');
   saveData();
 };
 
@@ -136,6 +126,7 @@ const addNewTodo = () => {
       title: addForm.title,
       isDone: false,
       content: addForm.content,
+      date: moment().format('YYYY-MM-DD HH:mm:ss')
     });
     addVisible.value = false;
     saveData();
@@ -156,14 +147,7 @@ const doneTodo = (index) => {
 
 // 选择当前todo
 const currentTodoClick = (id) => {
-  // const obj = todos.value.find(t => t.id === id)
   currentTodoId.value = id;
-
-  // if (obj) {
-  //   currentTodo.id = obj.id;
-  //   currentTodo.content = obj.content;
-  //   currentTodo.title = obj.title;
-  // }
 };
 
 // 下载json文件
@@ -198,6 +182,11 @@ const totalTodos = computed(() => todos.value.length);
 const completedTodos = computed(
   () => todos.value.filter((t) => t.isDone).length
 );
+
+const addDialogClose = () => {
+  addForm.title = '';
+  addForm.content = '';
+}
 </script>
 
 <style scoped lang="less">
@@ -259,7 +248,7 @@ const completedTodos = computed(
     }
 
     .task {
-      background: #3fc1c9;
+      background: #99CCFF;
       color: white;
       border-radius: 0.6rem;
       padding: 1rem;
