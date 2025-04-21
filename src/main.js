@@ -7,6 +7,13 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 
+// Using ES6 import syntax
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+
+// Then register the languages you need
+hljs.registerLanguage('javascript', javascript);
+
 const app = createApp(App);
 
 // 全局提供 MQTT 服务

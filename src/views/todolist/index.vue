@@ -13,17 +13,13 @@
         />
         <button @click="addVisible = true" class="btn-input">添加</button>
       </div>
-      <ul class="task" v-if="filteredTodos.length">
-        <todo-item
-          v-for="(todo, index) in filteredTodos"
-          :key="todo.id"
-          :todo="todo"
-          @currentClick="currentTodoClick"
-          @remove="() => removeTodo(index)"
-          @done="() => doneTodo(index)"
-          @edit="(content) => editContent(index, content)"
-        />
-      </ul>
+      <todo-list
+        :filteredTodos="filteredTodos"
+        @currentClick="currentTodoClick"
+        @remove="removeTodo"
+        @done="doneTodo"
+        @edit="(index, content) => editContent(index, content)"
+      />
       <button
         @click="download"
         style="margin-top: 10px"
@@ -70,11 +66,11 @@
 
 <script setup>
 import { ref, computed, reactive } from "vue";
-import TodoItem from "./todo-item.vue";
 import TodoFilter from "./todo-filter.vue";
-import RightPage from './right-page.vue';
+import RightPage from "./right-page.vue";
+import TodoList from "./todo-list.vue";
 import { downloadJSON } from "../../utils/download.js";
-import moment from 'moment';
+import moment from "moment";
 
 const newTodoText = ref("");
 
@@ -114,7 +110,7 @@ function saveData() {
 
 const editContent = (index, content) => {
   todos.value[index].content = content;
-  todos.value[index].date = moment().format('YYY-MM-DD HH:mm:ss');
+  todos.value[index].date = moment().format("YYYY-MM-DD HH:mm:ss");
   saveData();
 };
 
@@ -126,7 +122,7 @@ const addNewTodo = () => {
       title: addForm.title,
       isDone: false,
       content: addForm.content,
-      date: moment().format('YYYY-MM-DD HH:mm:ss')
+      date: moment().format("YYYY-MM-DD HH:mm:ss"),
     });
     addVisible.value = false;
     saveData();
@@ -153,7 +149,6 @@ const currentTodoClick = (id) => {
 // 下载json文件
 const download = () => {
   if (todos.value) {
-    console.log(todos.value);
     downloadJSON(todos.value);
   }
 };
@@ -184,9 +179,9 @@ const completedTodos = computed(
 );
 
 const addDialogClose = () => {
-  addForm.title = '';
-  addForm.content = '';
-}
+  addForm.title = "";
+  addForm.content = "";
+};
 </script>
 
 <style scoped lang="less">
@@ -248,7 +243,7 @@ const addDialogClose = () => {
     }
 
     .task {
-      background: #99CCFF;
+      background: #99ccff;
       color: white;
       border-radius: 0.6rem;
       padding: 1rem;

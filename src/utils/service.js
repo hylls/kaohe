@@ -1,3 +1,4 @@
+import moment from "moment";
 import mqtt from "mqtt";
 
 // MQTT 配置
@@ -19,7 +20,7 @@ class MQTTService {
     this.messageHandlers = new Set();
     this.connectHandler = null;
     this.errorHandler = null;
-    this.subscribeList = new Set();
+    this.subscribeList = [];
   }
 
   // 连接MQTT服务器
@@ -82,7 +83,18 @@ class MQTTService {
           console.log(`Subscribed to ${topic}`);
         }
       });
-      this.subscribeList.add(topic);
+      if (this.subscribeList.length === 0) {
+        this.subscribeList.push({
+          topic,
+          date: moment().format('YYYY-MM-DD HH:mm:ss')
+        });
+      } else if (!this.subscribeList.find(s => s.topic === topic)) {
+        this.subscribeList.push({
+          topic,
+          date: moment().format('YYYY-MM-DD HH:mm:ss')
+        })
+      }
+      console.log(this.subscribeList);
     }
   }
 
@@ -96,7 +108,7 @@ class MQTTService {
           console.log(`Unsubscribed from ${topic}`);
         }
       });
-      this.subscribeList.delete(topic);
+      this.subscribeList = this.subscribeList.filter(s => s.topic !== topic);
     }
   }
 

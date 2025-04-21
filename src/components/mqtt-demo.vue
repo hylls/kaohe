@@ -18,14 +18,34 @@
 
       <el-form style="margin-top: 20px" :model="mqttForm" label-width="auto">
         <el-form-item label="主题">
-          <el-input
-            disabled
-            style="width: 200px"
-            v-model="mqttForm.subscribeTopic"
-          />
-          <el-button style="margin-left: 20px" type="primary">订阅</el-button>
+          <el-input @input="mqttForm.subscribeTopic = mqttForm.subscribeTopic.trim()" style="width: 200px" v-model="mqttForm.subscribeTopic" />
+          <el-button @click="subscribe" style="margin-left: 20px" type="primary"
+            >订阅</el-button
+          >
         </el-form-item>
       </el-form>
+
+      <div class="subscribeTable">
+        <el-table
+          v-if="subscribeList && subscribeList.length"
+          :data="subscribeList"
+        >
+          <el-table-column fixed prop="date" label="时间" width="180" />
+          <el-table-column prop="topic" label="主题" width="180" />
+          <el-table-column label="操作">
+            <template #default="scope">
+              <el-button
+                size="small"
+                type="danger"
+                @click="handleUnsubscribe(scope.$index, scope.row)"
+              >
+                取消订阅
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-else />
+      </div>
     </div>
 
     <div class="messages">
@@ -88,9 +108,9 @@ import {
   onBeforeUnmount,
   inject,
   reactive,
-  onUpdated,
 } from "vue";
 import { MQTT_CONFIG } from "../utils/service";
+import moment from "moment";
 
 export default {
   name: "MqttDemo",
@@ -101,9 +121,7 @@ export default {
     });
 
     const mqttService = inject("mqttService");
-    onUpdated(() => {
-      console.log(mqttService.subscribeList);
-    });
+    const subscribeList = ref([...mqttService.subscribeList]);
 
     const isConnected = ref(false);
     const receivedMessages = ref([]);
@@ -112,6 +130,24 @@ export default {
 
     const connectionStatus = ref("Disconnected");
     const connectionStatusClass = ref("disconnected");
+
+    const subscribe = () => {
+      mqttService.subscribe(mqttForm.subscribeTopic);
+      if (
+        !subscribeList.value.find((s) => s.topic === mqttForm.subscribeTopic)
+      ) {
+        subscribeList.value.push({
+          topic: mqttForm.subscribeTopic,
+          date: moment().format("YYYY-MM-DD HH:mm:ss"),
+        });
+      }
+    };
+
+    const handleUnsubscribe = (_, row) => {
+      console.log(row);
+      mqttService.unsubscribe(row.topic)
+      subscribeList.value = subscribeList.value.filter(s => s.topic !== row.topic);
+    }
 
     // 处理接收到的消息
     const handleMessage = (topic, message) => {
@@ -216,6 +252,9 @@ export default {
       disConnect,
       mqttForm,
       publishMessages,
+      subscribe,
+      subscribeList,
+      handleUnsubscribe
     };
   },
 };
