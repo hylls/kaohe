@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, reactive  } from "vue";
+import { ref, reactive, onMounted  } from "vue";
 
 const props = defineProps({
   filteredTodos: Array,
@@ -80,9 +80,16 @@ const centerDialogVisible = ref(false);
 const currentIndex = ref(0);
 
 const form = reactive({
-  title: props.filteredTodos[currentIndex.value].title,
-  content: props.filteredTodos[currentIndex.value].content,
+  title: '',
+  content: '',
 });
+
+onMounted(() => {
+  if (props.filteredTodos.length) {
+    form.title = props.filteredTodos[currentIndex.value].title;
+    form.content = props.filteredTodos[currentIndex.value].content;
+  }
+})
 
 
 const editClick = (index) => {

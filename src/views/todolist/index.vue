@@ -29,6 +29,15 @@
         下载当前待办事项文件
       </button>
 
+      <!-- <el-input @change="importFile" type="file" name="file" id="file" /> -->
+      <button
+        @click="importFile"
+        style="margin: 10px 0 0 10px"
+        class="btn-input"
+      >
+        导入JSON文件
+      </button>
+
       <el-dialog
         @close="addDialogClose"
         v-model="addVisible"
@@ -69,7 +78,7 @@ import { ref, computed, reactive } from "vue";
 import TodoFilter from "./todo-filter.vue";
 import RightPage from "./right-page.vue";
 import TodoList from "./todo-list.vue";
-import { downloadJSON } from "../../utils/download.js";
+import { downloadJSON, importJSON } from "../../utils/download.js";
 import moment from "moment";
 
 const newTodoText = ref("");
@@ -151,6 +160,23 @@ const download = () => {
   if (todos.value) {
     downloadJSON(todos.value);
   }
+};
+
+
+const fileList = ref([]);
+// 导入JSON文件
+const importFile = () => {
+  importJSON().then(res => {
+    todos.value = res;
+    saveData();
+  })
+  // let json = document.getElementById("file").files[0];
+  // const reader = new FileReader();
+  // reader.readAsText(json, "UTF-8");
+  // reader.onload = function (evt) {
+  //   const data = JSON.parse(evt.target.result);
+  //   todos.value = data;
+  // };
 };
 
 // 更新筛选条件
